@@ -1,3 +1,8 @@
+
+Question: Can you help me to find and example of factory scheduling problem with machines, robtos, tasks and  workers?
+
+Answer:
+
 Sure, here is an example of a factory scheduling problem with machines, robots, tasks, and workers:
 
 Assume a factory has five machines, four robots, and 10 workers. There are 15 tasks that need to be completed, with varying levels of complexity and time required to complete. Each task can be completed by either a worker or a robot, but some tasks require a specific machine to be used.
