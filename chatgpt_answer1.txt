@@ -1,0 +1,11 @@
+Sure, here is an example of a factory scheduling problem with machines, robots, tasks, and workers:
+
+Assume a factory has five machines, four robots, and 10 workers. There are 15 tasks that need to be completed, with varying levels of complexity and time required to complete. Each task can be completed by either a worker or a robot, but some tasks require a specific machine to be used.
+
+The goal of the factory scheduling problem is to assign each task to a worker or a robot and determine the sequence of tasks to be performed to optimize productivity and minimize idle time. The scheduling problem must also take into account the availability of machines and workers, as well as the time required to set up each machine for a particular task.
+
+For example, a simple scheduling solution could involve assigning the most complex tasks to the robots and the less complex tasks to the workers. The machines could be scheduled in such a way that they are always in use, with minimal downtime between tasks.
+
+However, more complex solutions may involve optimizing the sequence of tasks based on the availability of workers, machines, and robots, as well as the time required to complete each task. This can be achieved through the use of advanced scheduling algorithms and optimization techniques.
+
+Overall, factory scheduling problems can be quite complex and require careful consideration of a wide range of factors to ensure efficient and effective production.
