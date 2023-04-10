@@ -8,3 +8,7 @@ Universitad Politècnica de València, Spain
 in: Journal of Cleaner Production 162.(2017) http://dx.doi.org/10.1016/j.jclepro.2016.11.002
 
 https://riunet.upv.es/bitstream/handle/10251/104443/JCLEPR.pdf
+
+###  Frontline Systems: Create, Deploy and Manage Analytics for Better Decisions in Azure, Power Platform, Excel
+https://www.solver.com/
+
