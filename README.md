@@ -12,3 +12,9 @@ https://riunet.upv.es/bitstream/handle/10251/104443/JCLEPR.pdf
 ###  Frontline Systems: Create, Deploy and Manage Analytics for Better Decisions in Azure, Power Platform, Excel
 https://www.solver.com/
 
+###  How It's Made Deep Cycle Batteries
+How It's Made Official
+https://www.youtube.com/watch?v=FN1FUmyJpVE
+
+### BMW Motor production
+https://www.youtube.com/watch?v=TlsuUmwV6G4
