@@ -18,40 +18,40 @@
    Tested with Scryer Prolog.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-:- load_files('req3.pl').
+:- load_files('req_factory.pl').
 
 :- use_module(library(clpfd)).
 :- use_module(library(persistency)).
 :- use_module(library(reif)).
 
 /*
-:- dynamic(class_subject_teacher_times/4).
+:- dynamic(tool_task_worker_times/4).
 :- dynamic(coupling/4).
 :- dynamic(teacher_freeday/2).
 :- dynamic(slots_per_day/1).
 :- dynamic(slots_per_week/1).
-:- dynamic(class_freeslot/2).
+:- dynamic(tool_freeslot/2).
 :- dynamic(room_alloc/4)
 */
 
-:- dynamic class_subject_teacher_times/4.
+:- dynamic tool_task_worker_times/4.
 :- dynamic coupling/4.
 :- dynamic teacher_freeday/2.
 :- dynamic slots_per_day/1.
 :- dynamic slots_couplings/2.
 :- dynamic slots_per_week/1.
-:- dynamic class_freeslot/2.
+:- dynamic tool_freeslot/2.
 :- dynamic room_alloc/4.
 
 
-:- discontiguous class_subject_teacher_times/4.
-:- discontiguous class_freeslot/2.
+:- discontiguous tool_task_worker_times/4.
+:- discontiguous tool_freeslot/2.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 			 Posting constraints
    The most important data structure in this CSP are pairs of the form
       Req-Vs
-   where Req is a term of the form req(C,S,T,N) (see below), and Vs is
+   where Req is a term of the form req(To,Ta,W,N) (see below), and Vs is
    a list of length N. The elements of Vs are finite domain variables
    that denote the *time slots* of the scheduled lessons of Req. We
    call this list of Req-Vs pairs the requirements.
@@ -68,19 +68,19 @@
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
-classes(Classes) :-
-       setof(C, S^N^T^class_subject_teacher_times(C,S,T,N), Classes).
+tools(Tools) :-
+       setof(to, Ta^W^N^tool_task_worker_times(To,Ta,W,N), Tools).
 		
-teachers(Teachers) :-
-        setof(T, C^S^N^class_subject_teacher_times(C,S,T,N), Teachers).
+workers(Workers) :-
+        setof(T, To^Ta^N^tool_task_worker_times(To,Ta,W,N), Workers).
 		
 rooms(Rooms) :-
-        findall(Room, room_alloc(Room,_C,_S,_Slot), Rooms0),
+        findall(Room, room_alloc(Room,_T,_Ta,_Slot), Rooms0),
         sort(Rooms0, Rooms).
 		
 requirements(Rs) :-
-        Goal = class_subject_teacher_times(Class,Subject,Teacher,Number),
-        setof(req(Class,Subject,Teacher,Number), Goal, Rs0),
+        Goal = tool_task_worker_times(Tool,Task,Worker,Number),
+        setof(req(Tool,Task,Worker,Number), Goal, Rs0),
         maplist(req_with_slots, Rs0, Rs).
 
 req_with_slots(R, R-Slots) :- R = req(_,_,_,N), length(Slots, N).
@@ -90,20 +90,20 @@ pairs_slots(Ps, Vs) :-
         pairs_values(Ps, Vs0),
         append(Vs0, Vs).
 			
-sameroom_var(Reqs, r(Class,Subject,Lesson), Var) :-
-        memberchk(req(Class,Subject,_Teacher,_Num)-Slots, Reqs),
+sameroom_var(Reqs, r(Tool,Task,Lesson), Var) :-
+        memberchk(req(Tool,Task,_Worker,_Num)-Slots, Reqs),
         nth0(Lesson, Slots, Var).
 		
 strictly_ascending(Ls) :- chain(Ls, #<).
 
 constrain_room(Reqs, Room) :-
-        findall(r(Class,Subj,Less), room_alloc(Room,Class,Subj,Less), RReqs),
+        findall(r(Tool,Task,Less), room_alloc(Room,Tool,Task,Less), RReqs),
         maplist(sameroom_var(Reqs), RReqs, Roomvars),
         all_different(Roomvars).
 
-slot_quotient(S, Q) :-
+slot_quotient(Ta, Q) :-
         slots_per_day(SPD),
-        Q #= S // SPD.
+        Q #= Ta // SPD.
 
 /*		
 without_([], _, Es) --> seq(Es).
@@ -119,24 +119,24 @@ without_at_pos0(>, E, Ws0, Ws0) --> [E].
 % list_without_nths(Es0, Ws, Es) :-
 %        phrase(without_(Ws, 0, Es0), Es).
 
- list_without_nths(Lista, [], Lista).
+ list_without_nths(List, [], List).
  
- list_without_nths(Lista, [Cab|Resto], R2):-
-   list_without_nths(Lista, Resto, R), elimina_pos(R, Cab, R2).
+ list_without_nths(List, [Head|Tail], R2):-
+   list_without_nths(List, Tail, R), elimina_pos(R, Head, R2).
    
 /*   
- elimina_pos(+Lista, +Pos, -R)
+ elimina_pos(+List, +Pos, -R)
    es cierto si R unifica con una lista que contiene los elementos
-   de Lista exceptuando el que ocupa la posición Pos. Los
+   de List exceptuando el que ocupa la posición Pos. Los
    valores de posiciones empiezan en 0.
 */
 
  elimina_pos([], _, []).
  
- elimina_pos([_|Resto], 0, Resto).
+ elimina_pos([_|Tail], 0, Tail).
  
- elimina_pos([Cab|Resto], Pos, [Cab|R]):- Pos > 0, Pos2 #= Pos - 1,
-   elimina_pos(Resto, Pos2, R).
+ elimina_pos([Head|Tail], Pos, [Head|R]):- Pos > 0, Pos2 #= Pos - 1,
+   elimina_pos(Tail, Pos2, R).
 		
 %:- list_without_nths("abcd", [3], "abc").
 %:- list_without_nths("abcd", [1,2], "ad").		
@@ -148,29 +148,29 @@ requirements_variables(Rs, Vars) :-
         slots_per_week(SPW),
         Max #= SPW - 1,
         Vars ins 0..Max,
-        maplist(constrain_subject, Rs),
-        classes(Classes),
-        teachers(Teachers),
+        maplist(constrain_task, Rs),
+        tools(tools),
+        workers(Workers),
         rooms(Rooms),
-        maplist(constrain_teacher(Rs), Teachers),
-        maplist(constrain_class(Rs), Classes),
+        maplist(constrain_worker(Rs), Workers),
+        maplist(constrain_class(Rs), Tools),
         maplist(constrain_room(Rs), Rooms).
 
-constrain_class(Rs, Class) :-
-        tfilter(class_req(Class), Rs, Sub),
+constrain_class(Rs, Tool) :-
+        tfilter(tool_req(Tool), Rs, Sub),
         pairs_slots(Sub, Vs),
         all_different(Vs),
-        findall(S, class_freeslot(Class,S), Frees),
+        findall(S, tool_freeslot(Tool,S), Frees),
         maplist(all_diff_from(Vs), Frees).
 
 all_diff_from(Vs, F) :- maplist(#\=(F), Vs).
 
-constrain_subject(req(Class,Subj,_Teacher,_Num)-Slots) :-
+constrain_task(req(Tool,Task,_Worker,_Num)-Slots) :-
         strictly_ascending(Slots), % break symmetry
         maplist(slot_quotient, Slots, Qs0),
-        findall(F-S, coupling(Class,Subj,F,S), Cs),
-        maplist(slots_couplings(Slots), Cs),
-        pairs_values(Cs, Seconds0),
+        findall(F-S, coupling(Tool,Task,F,S), Ts),
+        maplist(slots_couplings(Slots), Ts),
+        pairs_values(Ts, Seconds0),
         sort(Seconds0, Seconds),
         list_without_nths(Qs0, Seconds, Qs),
         strictly_ascending(Qs).	
@@ -180,26 +180,26 @@ slots_couplings(Slots, F-S) :-
         nth0(S, Slots, S2),
         S2 #= S1 + 1.		
 
-constrain_teacher(Rs, Teacher) :-
-        tfilter(teacher_req(Teacher), Rs, Sub),
+constrain_worker(Rs, Worker) :-
+        tfilter(teacher_req(Worker), Rs, Sub),
         pairs_slots(Sub, Vs),
         all_different(Vs),
-        findall(F, teacher_freeday(Teacher, F), Fs),
+        findall(F, teacher_freeday(Worker, F), Fs),
         maplist(slot_quotient, Vs, Qs),
         maplist(all_diff_from(Qs), Fs).
 
-teacher_req(T0, req(_C,_S,T1,_N)-_, T) :- =(T0,T1,T).
-class_req(C0, req(C1,_S,_T,_N)-_, T) :- =(C0, C1, T).
+teacher_req(T0, req(_T,_S,T1,_N)-_, T) :- =(T0,T1,T).
+tool_req(T0, req(T1,_S,_T,_N)-_, T) :- =(T0, T1, T).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Relate teachers and classes to list of days.
-   Each day is a list of subjects (for classes), and a list of
-   class/subject terms (for teachers). The predicate days_variables/2
+   Each day is a list of tasks (for classes), and a list of
+   class/task terms (for teachers). The predicate days_variables/2
    yields a list of days with the right dimensions, where each element
    is a free variable.
    We use the atom 'free' to denote a free slot, and the compound terms
-   class_subject(C, S) and subject(S) to denote classes/subjects.
-   This clean symbolic distinction is used to support subjects
+   tool_task(T, S) and task(S) to denote classes/tasks.
+   This clean symbolic distinction is used to support tasks
    that are called 'free', and to improve generality and efficiency.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -212,46 +212,46 @@ days_variables(Days, Vs) :-
         maplist(same_length(Day), Days),
         append(Days, Vs).
 		
-class_days(Rs, Class, Days) :-
+tool_days(Rs, Tool, Days) :-
         days_variables(Days, Vs),
-        tfilter(class_req(Class), Rs, Sub),
+        tfilter(tool_req(Tool), Rs, Sub),
         foldl(v(Sub), Vs, 0, _).
 
 v(Rs, V, N0, N) :-
-        (   member(req(_,Subject,_,_)-Times, Rs),
-            member(N0, Times) -> V = subject(Subject)
+        (   member(req(_,Task,_,_)-Times, Rs),
+            member(N0, Times) -> V = task(Task)
         ;   V = free
         ),
         N #= N0 + 1.
 
-teacher_days(Rs, Teacher, Days) :-
+teacher_days(Rs, Worker, Days) :-
         days_variables(Days, Vs),
-        tfilter(teacher_req(Teacher), Rs, Sub),
-        foldl(v_teacher(Sub), Vs, 0, _).
+        tfilter(teacher_req(Worker), Rs, Sub),
+        foldl(v_worker(Sub), Vs, 0, _).
 
-v_teacher(Rs, V, N0, N) :-
-        (   member(req(C,Subj,_,_)-Times, Rs),
-            member(N0, Times) -> V = class_subject(C, Subj)
+v_worker(Rs, V, N0, N) :-
+        (   member(req(T,Task,_,_)-Times, Rs),
+            member(N0, Times) -> V = tool_task(T, Task)
         ;   V = free
         ),
         N #= N0 + 1.
 		
-% requirements_variables(Rs, Vs), labeling([ff], Vs), class_days(Rs, '1a', Days), transpose(Days, DaysT).
+% requirements_variables(Rs, Vs), labeling([ff], Vs), tool_days(Rs, '1a', Days), transpose(Days, DaysT).
 
-print_classes(Rs) :-
-        classes(Cs),
-        format_classes(Cs, Rs).
+print_tools(Rs) :-
+        classes(Ts),
+        format_tools(Ts, Rs).
 
-format_classes([], _).
-format_classes([Class|Classes], Rs):-
-  class_days(Rs, Class, Days0),
+format_tools([], _).
+format_tools([Tool|Tooles], Rs):-
+  tool_days(Rs, Tool, Days0),
   transpose(Days0, Days),
-  format("Class: ~w~2n", [Class]),
+  format("Tool: ~w~2n", [Tool]),
   weekdays_header,
   align_rows(Days),
-  format_classes(Classes, Rs).
+  format_tools(Tooles, Rs).
   
-% [subject(mat), free, class_subject('1a', mat), free]
+% [task(mat), free, tool_task('1a', mat), free]
 % [mat, '', '1a/mat', '']
  
 align_rows([]):- format("\n\n\n",[]).
@@ -270,37 +270,37 @@ weekdays_header():-
         format("~n~`=t~40|~n", []). 
 
 translate_row([], []).
-translate_row([subject(S)|Tail], [S|R]):-   
+translate_row([task(S)|Tail], [S|R]):-   
    translate_row(Tail, R).
-translate_row([class_subject(C,S)|Tail], [C/S|R]):-   
+translate_row([tool_task(T,S)|Tail], [T/S|R]):-   
    translate_row(Tail, R).
 translate_row([free|Tail], [''|R]):-   
    translate_row(Tail, R).
 
 
 align(free):- format("~t~w~t~8+", ['']).
-align(class_subject(C,S)):- format("~t~w~t~8+", [C/S]).		
-align(subject(S)):- format("~t~w~t~8+", [S]).
+align(tool_task(T,S)):- format("~t~w~t~8+", [T/S]).		
+align(task(S)):- format("~t~w~t~8+", [S]).
 align([E1,E2,E3,E4,E5]):- format("~t~w~t~8+~t~w~t~8+~t~w~t~8+~t~w~t~8+~t~w~t~8+", [E1,E2,E3,E4,E5]).
 
 with_verbatim(T, verbatim(T)).
 
-format_teachers([], _).
-format_teachers([T|Ts], Rs):-
+format_workers([], _).
+format_workers([T|Ts], Rs):-
         teacher_days(Rs, T, Days0),
         transpose(Days0, Days),
-        format("Teacher: ~w~2n", [T]),
+        format("Worker: ~w~2n", [T]),
         weekdays_header,
         align_rows(Days),
-        format_teachers(Ts, Rs).
+        format_workers(Ts, Rs).
 		
-print_teachers(Rs) :-
+print_workers(Rs) :-
         teachers(Ts),
-        format_teachers(Ts, Rs).		
+        format_workers(Ts, Rs).		
 		
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   ?- requirements_variables(Rs, Vs), labeling([ff], Vs), print_classes(Rs).
-   %@ Class: 1a
+   ?- requirements_variables(Rs, Vs), labeling([ff], Vs), print_tools(Rs).
+   %@ Tool: 1a
    %@
    %@   Mon     Tue     Wed     Thu     Fri
    %@ ========================================
