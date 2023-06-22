@@ -1,12 +1,18 @@
-slots_per_day(7).
+slots_per_day(24).
 
 %class_subject_teacher_times('1a', ume, ume1, 2).
 %class_subject_teacher_times('1a', nej, nej1, 3).
 
 job_task_worker_times('motor_production', milling, milling_robot_1, 5).
 job_task_worker_times('motor_production', drill, drilling_robot_1, 5).
- 
+job_task_worker_times('motor_production', turn, turning_robot_1, 5).
+job_task_worker_times('motor_production', assemble, assembling_robot_1, 5).
+job_task_worker_times('motor_production', varnish, coating_robot_1, 5).
+job_task_worker_times('motor_production', wash, washing_robot_1, 5).
+job_task_worker_times('motor_production', dry, drying_robot_1, 5).
 
+
+/*
 class_subject_teacher_times('1a', deu, sjk1, 4).
 class_subject_teacher_times('1a', mat, mat1, 5).
 class_subject_teacher_times('1a', eng, anj1, 3).
@@ -33,3 +39,4 @@ class_subject_teacher_times('1b', ph, fiz2, 2).
 class_subject_teacher_times('1b', f, rai1, 2).
 class_subject_teacher_times('1b', ume, ume1, 2).
 class_subject_teacher_times('1b', lat, atvz2, 3).
+*/
