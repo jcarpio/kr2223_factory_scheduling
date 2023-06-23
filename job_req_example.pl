@@ -3,13 +3,20 @@ slots_per_day(24).
 %class_subject_teacher_times('1a', ume, ume1, 2).
 %class_subject_teacher_times('1a', nej, nej1, 3).
 
-job_task_worker_times('motor_production', milling, milling_robot_1, 5).
+job_task_worker_times('motor_production', milling, milling_robot_1, 1).
 job_task_worker_times('motor_production', drill, drilling_robot_1, 5).
-job_task_worker_times('motor_production', turn, turning_robot_1, 5).
-job_task_worker_times('motor_production', assemble, assembling_robot_1, 5).
-job_task_worker_times('motor_production', varnish, coating_robot_1, 5).
-job_task_worker_times('motor_production', wash, washing_robot_1, 5).
+job_task_worker_times('motor_production', turn, turning_robot_1, 9).
+job_task_worker_times('motor_production', assemble, assembling_robot_1, 13).
+job_task_worker_times('motor_production', varnish, coating_robot_1, 17).
+job_task_worker_times('motor_production', wash, washing_robot_1, 21).
 job_task_worker_times('motor_production', dry, drying_robot_1, 5).
+
+coupling('motor_production', milling, 1, 4).
+coupling('motor_production', drill, 5, 8).
+coupling('motor_production', turn, 9, 12).
+coupling('motor_production', assemble, 13, 16).
+coupling('motor_production', varnish, 17, 20).
+coupling('motor_production', wash, 21, 24).
 
 
 /*
